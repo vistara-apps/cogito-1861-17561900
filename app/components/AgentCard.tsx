@@ -1,9 +1,9 @@
-
 "use client";
 
 import { formatDistanceToNow } from "date-fns";
 import { Copy, CheckCircle, XCircle, Clock } from "lucide-react";
 import { useState } from "react";
+import { CrewAIIntegration } from "./CrewAIIntegration";
 
 interface AgentCardProps {
   agent: {
@@ -18,6 +18,7 @@ interface AgentCardProps {
 
 export function AgentCard({ agent, variant = 'active' }: AgentCardProps) {
   const [copied, setCopied] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
 
   const getStatusIcon = () => {
     switch (agent.status) {
@@ -87,8 +88,39 @@ export function AgentCard({ agent, variant = 'active' }: AgentCardProps) {
               Created {formatDistanceToNow(new Date(agent.createdAt), { addSuffix: true })}
             </span>
           </div>
+          
+          <div className="mt-4">
+            <button
+              onClick={() => setShowDetails(!showDetails)}
+              className="text-primary text-sm hover:underline"
+            >
+              {showDetails ? 'Hide Details' : 'Show Details'}
+            </button>
+          </div>
         </div>
       </div>
+      
+      {showDetails && (
+        <div className="mt-4 pt-4 border-t border-border">
+          <div className="space-y-2">
+            <div>
+              <span className="caption text-text-secondary">Owner:</span>
+              <code className="caption bg-bg px-2 py-1 rounded text-xs ml-2">
+                {agent.ownerAddress}
+              </code>
+            </div>
+            <div>
+              <span className="caption text-text-secondary">Agent ID:</span>
+              <code className="caption bg-bg px-2 py-1 rounded text-xs ml-2">
+                {agent.agentId}
+              </code>
+            </div>
+          </div>
+          
+          <CrewAIIntegration agentId={agent.agentId} />
+        </div>
+      )}
     </div>
   );
 }
+

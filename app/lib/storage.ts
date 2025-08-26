@@ -1,69 +1,50 @@
-
 "use client";
 
-// Mock storage implementation for demo purposes
-// In production, this would integrate with Supabase
-export class MockStorage {
-  private agents: Map<string, any> = new Map();
-  private events: Map<string, any[]> = new Map();
+import { AgentService } from './agent-service';
+import { Agent, Event } from './supabase';
 
-  async getAgents(): Promise<any[]> {
-    return Array.from(this.agents.values());
+// Client-side wrapper for the AgentService
+export class Storage {
+  private agentService: AgentService;
+
+  constructor() {
+    this.agentService = new AgentService();
   }
 
-  async getAgent(agentId: string): Promise<any | null> {
-    return this.agents.get(agentId) || null;
+  async getAgents(): Promise<Agent[]> {
+    return this.agentService.getAgents();
   }
 
-  async createAgent(agent: any): Promise<any> {
-    this.agents.set(agent.agentId, agent);
-    this.events.set(agent.agentId, []);
-    
-    // Add initial registration event
-    const registeredEvent = {
-      eventId: `event_${Date.now()}`,
-      agentId: agent.agentId,
-      eventType: 'REGISTERED',
-      timestamp: new Date().toISOString(),
-      logMessage: `Agent ${agent.agentName} registered`,
-      metadata: {}
-    };
-    
-    this.events.get(agent.agentId)?.push(registeredEvent);
-    
-    return agent;
+  async getAgent(agentId: string): Promise<Agent | null> {
+    return this.agentService.getAgent(agentId);
   }
 
-  async getEvents(agentId: string): Promise<any[]> {
-    return this.events.get(agentId) || [];
+  async createAgent(agent: {
+    agentName: string;
+    ownerAddress: string;
+    metadata?: any;
+  }): Promise<Agent> {
+    return this.agentService.registerAgent(agent);
   }
 
-  async getAllEvents(): Promise<any[]> {
-    const allEvents: any[] = [];
-    for (const events of this.events.values()) {
-      allEvents.push(...events);
-    }
-    return allEvents.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  async getEvents(): Promise<Event[]> {
+    return this.agentService.getEvents();
   }
 
-  async createEvent(event: any): Promise<any> {
-    const agentEvents = this.events.get(event.agentId) || [];
-    agentEvents.push(event);
-    this.events.set(event.agentId, agentEvents);
-    
-    // Update agent status based on event type
-    const agent = this.agents.get(event.agentId);
-    if (agent) {
-      if (event.eventType === 'START' || event.eventType === 'RUNNING') {
-        agent.status = 'active';
-      } else if (event.eventType === 'COMPLETE' || event.eventType === 'FAIL') {
-        agent.status = 'inactive';
-      }
-      this.agents.set(event.agentId, agent);
-    }
-    
-    return event;
+  async getAgentEvents(agentId: string): Promise<Event[]> {
+    return this.agentService.getAgentEvents(agentId);
+  }
+
+  async createEvent(event: {
+    agentId: string;
+    eventType: Event['eventType'];
+    logMessage?: string;
+    metadata?: any;
+  }): Promise<Event> {
+    return this.agentService.logEvent(event);
   }
 }
 
-export const storage = new MockStorage();
+// Export a singleton instance
+export const storage = new Storage();
+

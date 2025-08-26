@@ -1,13 +1,14 @@
-
 import { NextResponse } from 'next/server';
+import { AgentService } from '@/app/lib/agent-service';
 
-// Mock database - in production this would use Supabase
-let agents: any[] = [];
+const agentService = new AgentService();
 
 export async function GET() {
   try {
+    const agents = await agentService.getAgents();
     return NextResponse.json({ agents });
   } catch (error) {
+    console.error('Error in GET /api/agents:', error);
     return NextResponse.json({ error: 'Failed to fetch agents' }, { status: 500 });
   }
 }
@@ -24,22 +25,19 @@ export async function POST(request: Request) {
       );
     }
 
-    const agent = {
-      agentId: `agent_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    const agent = await agentService.registerAgent({
       agentName,
       ownerAddress,
-      createdAt: new Date().toISOString(),
-      metadata: metadata || {},
-      status: 'active'
-    };
-
-    agents.push(agent);
+      metadata
+    });
 
     return NextResponse.json({ agent }, { status: 201 });
   } catch (error) {
+    console.error('Error in POST /api/agents:', error);
     return NextResponse.json(
       { error: 'Failed to create agent' },
       { status: 500 }
     );
   }
 }
+
