@@ -1,0 +1,14 @@
+{
+  "name": "Cogito",
+  "description": "Cogito is a Base Mini App built with Zara.",
+  "image": "https://dummyimage.com/1200x628/0a0b0d/ffffff.png&text=OG",
+  "external_url": "https://186149f6-d526-4c63-979e-a02a0ead53be.vistara.dev",
+  "properties": {
+    "app": {
+      "name": "Cogito",
+      "description": "Cogito is a Base Mini App built with Zara.",
+      "url": "https://186149f6-d526-4c63-979e-a02a0ead53be.vistara.dev",
+      "icon": "https://0co.to/images/zara-2.png"
+    }
+  }
+}
