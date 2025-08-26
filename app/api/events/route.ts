@@ -1,17 +1,14 @@
-
 import { NextResponse } from 'next/server';
+import { AgentService } from '@/app/lib/agent-service';
 
-// Mock database - in production this would use Supabase
-let events: any[] = [];
+const agentService = new AgentService();
 
 export async function GET() {
   try {
-    const sortedEvents = events.sort(
-      (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-    );
-    
-    return NextResponse.json({ events: sortedEvents });
+    const events = await agentService.getEvents();
+    return NextResponse.json({ events });
   } catch (error) {
+    console.error('Error in GET /api/events:', error);
     return NextResponse.json({ error: 'Failed to fetch events' }, { status: 500 });
   }
 }
@@ -28,22 +25,20 @@ export async function POST(request: Request) {
       );
     }
 
-    const event = {
-      eventId: `event_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    const event = await agentService.logEvent({
       agentId,
       eventType,
-      timestamp: new Date().toISOString(),
-      logMessage: logMessage || '',
-      metadata: metadata || {}
-    };
-
-    events.push(event);
+      logMessage,
+      metadata
+    });
 
     return NextResponse.json({ event }, { status: 201 });
   } catch (error) {
+    console.error('Error in POST /api/events:', error);
     return NextResponse.json(
       { error: 'Failed to create event' },
       { status: 500 }
     );
   }
 }
+
